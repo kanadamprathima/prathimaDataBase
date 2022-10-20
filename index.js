@@ -1,5 +1,5 @@
 const express = require("express");
-
+const userRouter = require("./routers/users");
 const User = require("./models").user;
 const TodoList = require("./models").todoList;
 const app = express();
@@ -10,76 +10,7 @@ app.use(express.json());
 // app.post("/echo", (req, res) => {
 //   res.json(req.body);
 // });
-
-// app.get("/users", async (req, res) => {
-//   const users = await User.findAll();
-//   // res.send(users);
-// });
-
-app.post("/users", async (req, res, next) => {
-  try {
-    const { name, email } = req.body;
-    console.log(name, email, "here");
-    if (!email || email === " ") {
-      res.status(400).send("Must provide an email address");
-    } else {
-      const user = await User.create(req.body);
-      res.send(user);
-    }
-  } catch (e) {
-    next(e.message);
-  }
-});
-app.get("/users/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    console.log("id", id);
-    const oneUser = await User.findByPk(id, { raw: true });
-    // console.log(oneUser);
-    if (!oneUser) {
-      res.status(404).send("User not found");
-    } else {
-      res.send(oneUser);
-    }
-  } catch (e) {
-    console.log(e.message);
-    next();
-  }
-});
-app.patch("/users/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    console.log("id", id);
-    const { name } = req.body;
-    const usertoUpdate = await User.findByPk(id, { raw: true });
-    console.log(usertoUpdate);
-    if (!usertoUpdate) {
-      res.status(404).send("user not found");
-    } else {
-      const updatedUser = await usertoUpdate.update({ name });
-      res.send(updatedUser);
-    }
-  } catch (e) {
-    console.log(e.message);
-    // next(e);
-  }
-});
-// http PATCH :4000/users/9 name=Banana
-app.patch("/users/:id", async (request, response, next) => {
-  //1. get id from params
-  const { id } = request.params;
-  const { name } = request.body;
-  //2. find patient to update
-  const patient = await User.findByPk(id);
-
-  if (!patient) {
-    response.status(404).send("No patient with that id");
-  } else {
-    const updatedPatient = await patient.update({ name });
-    response.send(updatedPatient);
-  }
-});
-
+app.use("/users", userRouter); //router exists only when v use this router
 app.get("/lists", async (req, res, next) => {
   const todoLists = await TodoList.findAll();
   res.json(todoLists);
